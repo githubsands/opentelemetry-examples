@@ -1,0 +1,19 @@
+{{- if .Values.multiplieNamespacesTelemetry }}
+{{- range $index, $machine := .Values.machines }}
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: machines-{{ $index }}
+  labels:
+    istio-injection: enabled
+{{ end }}
+{{ else }}
+{{- range $index, $machine := .Values.machines }}
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: default
+  labels:
+    istio-injection: enabled
+{{ end }}
+{{ end }}

@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: machine-one
+  labels:
+    app: machine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: machine-one
+  template:
+    metadata:
+      labels:
+        app: machines-one
+    spec:
+      containers:
+      - name: machine
+        image: machine/latest
+        imagePullPolicy: Never
+      - env:
+        - name: PEER_URL
+          value: machine-two.machines.svc.local:8080
+        - name: LISTENER_URL
+          value: machine-one.machines.svc.local:8080
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: machine-two
+  labels:
+    app: machine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: machines-two
+  template:
+    metadata:
+      labels:
+        app: machines-two
+    spec:
+      containers:
+      - name: machine
+        image: machine:latest
+        imagePullPolicy: Never
+      - env:
+        - name: PEER_URL
+          value: machine-three.machines.svc.local:8080
+        - name: LISTENER_URL
+          value: machine-two.machines.svc.local:8080
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: machine-three
+  labels:
+    app: machines
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: machine-three
+  template:
+    metadata:
+      labels:
+        app: machine-three
+    spec:
+      containers:
+      - name: machine
+        image: machine:latest
+        imagePullPolicy: Never
+      - env:
+        - name: PEER_URL
+          value: machine-one.machines.svc.local:8080
+        - name: LISTENER_URL
+          value: machine-three.machines.svc.local:8080
+apiVersion: v1
+kind: Service
+metadata:
+  name: machine-one
+spec:
+  selector:
+    app.kubernetes.io/name: machine-one
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+apiVersion: v1
+kind: Service
+metadata:
+  name: machine-two
+spec:
+  selector:
+    app.kubernetes.io/name: machine-two
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+apiVersion: v1
+kind: Service
+metadata:
+  name: machine-three
+spec:
+  selector:
+    app.kubernetes.io/name: machine-three
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

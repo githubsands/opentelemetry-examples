@@ -1,0 +1,25 @@
+ifndef RUN_CONFIG
+	$(error EXAMPLE variable was not defined)
+endif
+EXAMPLE_NAMESPACE:=${EXAMPLE}
+
+start: create_cluster deploy-lightstep-OTEL-helm
+
+.PHONY:
+deploy-lightstep-OTEL-helm:
+	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.crds.yaml
+	helmfile apply
+
+.PHONY:
+logs-otel-collector:
+	kubectl logs pod/lightstep-otel-collector-base-opentelemetry-collector
+
+.PHONY:
+create-cluster: ## create kind cluster. Kind also configures kubectl to use this cluster.
+	kind create cluster --name $(EXAMPLE_NAMESPACE)-cluster
+
+.PHONY:
+delete-cluster: ## delete the kind cluster with this name
+	kind delete cluster --name $(EXAMPLE_NAMESPACE)-cluster
+
+prereqs : _create-cluster create-namespace
